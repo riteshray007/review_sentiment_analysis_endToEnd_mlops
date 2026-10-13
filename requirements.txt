@@ -1,0 +1,13 @@
+pandas
+numpy
+dagshub
+dvc
+mlflow
+ipykernel
+nltk
+scikit-learn
+contractions
+emoji
+xgboost
+scipy
+skops
