@@ -16,6 +16,7 @@ list_of_files = [
       f"{note_book}/exp1.ipynb",
       f"{note_book}/exp2_bow_vs_tfidf.py",
       f"{note_book}/exp3_lor_bow_hp.py",
+      "local_s3/__init__.py"
 ]
 
 for filepath in list_of_files:

@@ -10,6 +10,7 @@ __pycache__/
 mlruns/
 credentials.txt
 mlflow.db
+local_s3
 
 
 # Distribution / packaging
