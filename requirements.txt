@@ -11,3 +11,12 @@ emoji
 xgboost
 scipy
 skops
+kagglehub
+dill
+PyYAML
+
+
+
+
+
+# -e .

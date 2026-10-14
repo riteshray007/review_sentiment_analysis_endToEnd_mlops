@@ -1,7 +1,6 @@
 import mlflow
 import mlflow.sklearn
 import re
-import string
 import html
 import dagshub
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
@@ -159,6 +158,11 @@ param_distributions = {
     "tfidf__max_df": [0.9, 0.95, 1.0],
     "tfidf__sublinear_tf": [True, False],
     "tfidf__max_features": [30000, 50000, None],
+    
+    # Additional TF-IDF parameters
+    "tfidf__norm": ["l1", "l2"],
+    "tfidf__binary": [True, False],
+    "tfidf__use_idf": [True, False],
 
     # SGDClassifier parameters
     "sgd__loss": ["hinge", "log_loss", "modified_huber"],
@@ -166,6 +170,11 @@ param_distributions = {
     "sgd__penalty": ["l2", "l1", "elasticnet"],
     "sgd__class_weight": [None, "balanced"],
     "sgd__average": [True, False],
+    
+    # Additional convergence parameters
+    "sgd__tol": [1e-3, 1e-4, 1e-5],
+    "sgd__max_iter": [1000, 2000, 3000],
+    
 }
 
 cv = StratifiedKFold(
@@ -206,7 +215,7 @@ def mlflow_experiment_tracking(df):
     )
 
     with mlflow.start_run(
-        run_name="2nd-SGDClassifier-TFIDF-RandomizedSearch"
+        run_name="3rd-SGDC-TFIDF-RSearch_added_params"
     ) as parent_run:
 
         mlflow.set_tags({
@@ -214,7 +223,7 @@ def mlflow_experiment_tracking(df):
             "algorithm": "SGDClassifier",
             "vectorizer": "TF-IDF",
             "search_method": "RandomizedSearchCV",
-        })
+        })                                                              
 
         mlflow.log_params({
             "n_iter": 30,
@@ -311,7 +320,7 @@ def mlflow_experiment_tracking(df):
                 accuracy_score(y_test, y_pred)
             ),
             "test_precision_macro": float(
-                precision_score(
+                precision_score(  
                     y_test, y_pred,
                     average="macro", zero_division=0
                 )
