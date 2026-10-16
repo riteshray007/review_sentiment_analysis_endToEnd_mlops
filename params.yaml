@@ -1,10 +1,28 @@
 # params.yaml
 data_ingestion:
-  test_size: 0.25
-  file_path: "notebooks/IMDB.csv"
-  random_state: 42
-  raw_train_file_path: "data/raw/train.csv"
-  raw_test_file_path: "data/raw/test.csv"
-
+  raw_data_path: "data/raw/data.csv"
+  
+data_preprocessing:  
+  train_file_path: "data/processed/train.csv"
+  test_file_path: "data/processed/test.csv"
+  
 feature_engineering:
+  best_parameters_file_path: "src/configs/best_params.yaml"
+  test_size: 0.20
+  random_state: 42
   max_features: 50
+  vectorized_train_file_path: "data/vectorized/train.npz"
+  vectorized_test_file_path: "data/vectorized/test.npz"
+  preprocessed_model_file_path: "models/processing.pkl"
+
+model_training:
+  model_file_path: "models/model.pkl"
+
+randomized_cv_search:
+  n_iter: 30
+  random_state: 42
+  n_jobs: -1
+  verbose: 2
+  error_score: "raise"
+  return_train_score: True
+  refit: "f1_macro"

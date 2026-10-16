@@ -152,7 +152,7 @@ pipeline = Pipeline([
     ("tfidf", TfidfVectorizer()),
     ("sgd", SGDClassifier(random_state=42))
 ])
-
+    
 param_distributions = {
     # TF-IDF parameters
     "tfidf__ngram_range": [(1, 1), (1, 2), (1, 3)],

@@ -5,7 +5,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 LOG_DIR = PROJECT_ROOT / "logs"
-LOG_FILE = f"{datetime.now().strftime('%d_%m_%y_%H_%M')}.log"
+LOG_FILE = f"{datetime.now().strftime('%d_%m_%y_%H')}.log"
 
 MAX_LOG_SIZE = 5 * 1024 * 1024
 BACKUP_COUNT = 3
