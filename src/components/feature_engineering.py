@@ -1,7 +1,7 @@
 import os
 import sys
 import pandas as pd
-from src.utils.main_utils import read_yaml_file , load_DataFrame , write_yaml_file , save_obj
+from src.utils.main_utils import read_yaml_file , load_DataFrame , write_yaml_file , save_obj , save_DataFrame
 from src.logger import logging
 from src.exception import MyException
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -20,50 +20,58 @@ class FeatureEngineering:
             self.processed_train_file = self.params['data_preprocessing']['train_file_path']
             self.processed_test_file = self.params['data_preprocessing']['test_file_path']
             self.best_params_file_path = self.params['feature_engineering']['best_parameters_file_path']
-            self.vectorized_train_file_path = self.params['feature_engineering']['vectorized_train_file_path']
-            self.vectorized_test_file_path = self.params['feature_engineering']['vectorized_test_file_path']
+            self.vectorized_train_file_path = self.params['feature_engineering']['vectorized_x_train_file_path']
+            self.vectorized_y_train_file_path = self.params['feature_engineering']['vectorized_y_train_file_path']
+            self.vectorized_test_file_path = self.params['feature_engineering']['vectorized_x_test_file_path']
+            self.vectorized_y_test_file_path = self.params['feature_engineering']['vectorized_y_test_file_path']
             self.preprocessing_obj_file_path = self.params['feature_engineering']['preprocessed_model_file_path']
             self.random_cv_params = self.params['randomized_cv_search']
             
       def start_feature_engineering(self):
             
             try:
-                  pass
+                  train_df:pd.DataFrame = load_DataFrame(self.processed_train_file)
+                  test_df:pd.DataFrame = load_DataFrame(self.processed_test_file)
+                  logging.info("successfully loaded train test dataframe ")
+
+                  print(train_df["review"].dtype)
+                  print(train_df["review"].isna().sum())
+                  print(train_df["review"].map(type).value_counts())
+                  print(train_df["review"].head())
+
+                  param = self.get_best_params(
+                        train_df['review'],
+                        train_df['sentiment']
+                  )
+
+                  logging.info(f" best params for tfidf vectorizer is - {param}")
+
+                  tfidf_params = param['feature_engineering']
+
+                  vectorizer = TfidfVectorizer(**tfidf_params)
+
+                  X_train = vectorizer.fit_transform(train_df["review"])
+                  y_train = train_df['sentiment']
+                  X_test = vectorizer.transform(test_df["review"])
+                  y_test = test_df['sentiment']
+                  logging.info('vectorizer fitting complete')
+
+                  os.makedirs(os.path.dirname(self.vectorized_train_file_path) , exist_ok=True)
+                  os.makedirs(os.path.dirname(self.vectorized_test_file_path) , exist_ok=True)
+                  save_npz( self.vectorized_train_file_path , X_train)
+                  save_npz( self.vectorized_test_file_path , X_test)
+                  logging.info("saved vectorized train test data successfully ")
+                  
+                  save_DataFrame(self.vectorized_y_train_file_path , y_train)
+                  save_DataFrame(self.vectorized_y_test_file_path , y_test)
+                  logging.info("saved target columns in data/vectorized directory ")
+
+                  save_obj(self.preprocessing_obj_file_path , vectorizer )
+                  logging.info(f"saved preprocessor.pkl file at {self.preprocessing_obj_file_path}")
+                  
             except Exception as e:
                   raise MyException(e , sys ) from e 
-            train_df:pd.DataFrame = load_DataFrame(self.processed_train_file)
-            test_df:pd.DataFrame = load_DataFrame(self.processed_test_file)
-            logging.info("successfully loaded train test dataframe ")
-            
-            print(train_df["review"].dtype)
-            print(train_df["review"].isna().sum())
-            print(train_df["review"].map(type).value_counts())
-            print(train_df["review"].head())
-            
-            param = self.get_best_params(
-                  train_df['review'],
-                  train_df['sentiment']
-            )
-            
-            logging.info(f" best params for tfidf vectorizer is - {param}")
-            
-            tfidf_params = param['feature_engineering']
-            
-            vectorizer = TfidfVectorizer(**tfidf_params)
 
-            X_train = vectorizer.fit_transform(train_df["review"])
-            X_test = vectorizer.transform(test_df["review"])
-            logging.info('vectorizer fitting complete')
-            
-            os.makedirs(os.path.dirname(self.vectorized_train_file_path) , exist_ok=True)
-            os.makedirs(os.path.dirname(self.vectorized_test_file_path) , exist_ok=True)
-            
-            save_npz( self.vectorized_train_file_path , X_train)
-            save_npz( self.vectorized_test_file_path , X_test)
-            logging.info("saved vectorized train test data successfully ")
-            
-            save_obj(self.preprocessing_obj_file_path , vectorizer )
-            logging.info(f"saved preprocessor.pkl file at {self.preprocessing_obj_file_path}")
                 
       def get_best_params(self , X_train , y_train ):
             try:

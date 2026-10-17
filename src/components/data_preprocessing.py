@@ -19,8 +19,8 @@ class DataPreProcessing:
       def __init__(self):
             self.params = read_yaml_file("params.yaml")
             self.raw_file_path = self.params['data_ingestion']['raw_data_path']
-            self.test_size = self.params['data_preprocessing']['test_size']
-            self.random_state = self.params['data_preprocessing']['random_state']
+            self.test_size = self.params['feature_engineering']['test_size']
+            self.random_state = self.params['feature_engineering']['random_state']
             self.processed_train_file_path = self.params['data_preprocessing']['train_file_path']
             self.processed_test_file_path = self.params['data_preprocessing']['test_file_path']
       
@@ -147,7 +147,7 @@ class DataPreProcessing:
 
                   y = df['sentiment']
                   train , test  = train_test_split(
-                      df,
+                      final_df,
                       test_size= self.test_size,
                       random_state=self.random_state,
                       stratify=y,
@@ -158,6 +158,7 @@ class DataPreProcessing:
                   save_DataFrame( self.processed_train_file_path  , train)
                   save_DataFrame( self.processed_test_file_path  , test)
                   logging.info("data preprocessing is completed and exiting preprocessing component ")
+                  
             except Exception as e:
                   logging.error(f"error - {e}")
                   raise MyException(e , sys ) from e
