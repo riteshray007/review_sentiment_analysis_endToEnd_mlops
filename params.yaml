@@ -19,7 +19,10 @@ feature_engineering:
 
 model_training:
   model_file_path: "models/model.pkl"
-  model_metrics_path : "src/configs/model_metrics.yaml"
+
+model_evaluation:
+  model_eval_metrics_path: "src/configs/model_metrics.yaml"
+  model_info_path: "src/configs/model_info.json"
 
 randomized_cv_search:
   n_iter: 30

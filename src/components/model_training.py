@@ -17,7 +17,6 @@ class ModelTraining:
             self.y_train_file = self.params["feature_engineering"]["vectorized_y_train_file_path"]
             self.y_test_file = self.params["feature_engineering"]["vectorized_y_test_file_path"]
             self.model_file_path = self.params['model_training']["model_file_path"]
-            self.model_metrics_path = self.params['model_training']["model_metrics_path"]
       
       def start_model_training(self):
             
