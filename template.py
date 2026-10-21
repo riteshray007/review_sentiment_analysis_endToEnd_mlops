@@ -12,6 +12,7 @@ list_of_files = [
       f"{project_name}/components/feature_engineering.py",
       f"{project_name}/components/model_training.py",
       f"{project_name}/components/model_evaluation.py",
+      f"{project_name}/components/model_registry.py",
       f"{project_name}/s3_services/__init__.py",
       f"{project_name}/s3_services/s3_connection.py",
       f"{project_name}/entity/config_entity.py",
