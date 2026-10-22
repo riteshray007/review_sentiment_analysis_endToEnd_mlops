@@ -1,0 +1,45 @@
+{
+  "run_id": "1ba778ed9a87402b98f870a37b8590e1",
+  "metrics": {
+    "accuracy": 0.9118,
+    "precision": 0.9070778964017399,
+    "recall": 0.9176,
+    "f1_score": 0.9123086100616424,
+    "auc_score": 0.96975464
+  },
+  "thresholds": {
+    "accuracy": 0.9,
+    "f1_score": 0.9,
+    "precision": 0.88,
+    "recall": 0.88,
+    "auc_score": 0.95
+  },
+  "checks": {
+    "accuracy": {
+      "actual": 0.9118,
+      "minimum": 0.9,
+      "passed": true
+    },
+    "f1_score": {
+      "actual": 0.9123086100616424,
+      "minimum": 0.9,
+      "passed": true
+    },
+    "precision": {
+      "actual": 0.9070778964017399,
+      "minimum": 0.88,
+      "passed": true
+    },
+    "recall": {
+      "actual": 0.9176,
+      "minimum": 0.88,
+      "passed": true
+    },
+    "auc_score": {
+      "actual": 0.96975464,
+      "minimum": 0.95,
+      "passed": true
+    }
+  },
+  "status": "passed"
+}

@@ -84,7 +84,7 @@ class modelEvaluation:
 
                         validation_report = self.build_validation_report(metrics, run.info.run_id)
                         self.save_validation_report(validation_report)
-                        logging.info("Validation status: %s", validation_report["status"])
+                        logging.info("Validation status: %s . saved successfully ", validation_report["status"] )
                         
                         mlflow.log_metrics(metrics)
                         
