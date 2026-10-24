@@ -29,30 +29,35 @@ class ModelRegistry:
 
       def load_validation_report(self, model_info: dict) -> dict:
             """Load the report and ensure it belongs to the model being registered."""
-            report = self.load_json(self.validation_report_path)
-            required_keys = {"run_id", "status", "checks"}
-            missing_keys = required_keys - report.keys()
-            if missing_keys:
-                  raise ValueError(f"Validation report is missing keys: {sorted(missing_keys)}")
-            if report["run_id"] != model_info["run_id"]:
-                  raise ValueError(
-                        "Validation report run_id does not match model_info run_id. "
-                        "Run model evaluation again before registry."
-                  )
-            if report["status"] not in {"passed", "failed"}:
-                  raise ValueError("Validation report status must be 'passed' or 'failed'.")
-            if not report["checks"]:
-                  raise ValueError("Validation report must contain at least one metric check.")
+            try:
+                logging.info("entered inside load_validation_report .. ")
+                report = self.load_json(self.validation_report_path)
+                required_keys = {"run_id", "status", "checks"}
+                missing_keys = required_keys - report.keys()
+                if missing_keys:
+                      raise ValueError(f"Validation report is missing keys: {sorted(missing_keys)}")
+                if report["run_id"] != model_info["run_id"]:
+                      raise ValueError(
+                            "Validation report run_id does not match model_info run_id. "
+                            "Run model evaluation again before registry."
+                      )
+                if report["status"] not in {"passed", "failed"}:
+                      raise ValueError("Validation report status must be 'passed' or 'failed'.")
+                if not report["checks"]:
+                      raise ValueError("Validation report must contain at least one metric check.")
 
-            checks_passed = all(check.get("passed") is True for check in report["checks"].values())
-            expected_status = "passed" if checks_passed else "failed"
-            if report["status"] != expected_status:
-                  raise ValueError("Validation report status does not match its metric checks.")
-            return report
-
+                checks_passed = all(check.get("passed") is True for check in report["checks"].values())
+                expected_status = "passed" if checks_passed else "failed"
+                if report["status"] != expected_status:
+                      raise ValueError("Validation report status does not match its metric checks.")
+                return report
+            except Exception as e:
+                raise MyException(e,sys) from e
+            
       def register_model(self, model_info: dict, validation_report: dict):
             """Register every evaluated candidate; only passing candidates receive staging."""
             try:
+                  logging.info("entered inside register_model method")
                   model_version = mlflow.register_model(
                         model_uri=model_info["model_uri"],
                         name=self.model_name,
@@ -93,8 +98,11 @@ class ModelRegistry:
 
       def start_model_registry(self):
             try:
+                  logging.info("model registry started ")
                   model_info = self.load_json(self.model_info_path)
+                  logging.info("successfully loaded model info file")
                   validation_report = self.load_validation_report(model_info)
+                  logging.info( "successfully created model validation report ")
                   model_version = self.register_model(model_info, validation_report)
                   logging.info("ModelRegistry completed for version %s", model_version.version)
                   return model_version

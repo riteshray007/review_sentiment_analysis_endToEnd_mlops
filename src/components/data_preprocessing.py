@@ -145,7 +145,7 @@ class DataPreProcessing:
                   logging.info("started text normalization ")
                   final_df = self.normalize_text(df)
 
-                  y = df['sentiment']
+                  y = final_df['sentiment']
                   train , test  = train_test_split(
                       final_df,
                       test_size= self.test_size,

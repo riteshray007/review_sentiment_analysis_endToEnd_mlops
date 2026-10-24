@@ -14,7 +14,9 @@ local_s3
 data/
 .vscode/
 models/
-
+src/configs/model_info.json
+src/configs/model_metrics.yaml
+src/configs/validation_report.json
 
 # Distribution / packaging
 .Python

@@ -1,0 +1,116 @@
+stages:
+  data_ingestion:
+    cmd: python src/components/data_ingestion.py
+    deps: 
+    - src/components/data_ingestion.py
+    - src/utils/main_utils.py
+    - src/exception/__init__.py
+    - src/logger/__init__.py
+    - src/s3_services/s3_connection.py
+    params:
+    - data_ingestion.raw_data_path
+    outs:
+    - data/raw/data.csv
+  
+  data_preprocessing:
+    cmd: python src/components/data_preprocessing.py
+    deps:
+    - src/components/data_preprocessing.py
+    - src/utils/main_utils.py
+    - src/exception/__init__.py
+    - src/logger/__init__.py
+    - data/raw/data.csv
+    params:
+    - data_ingestion.raw_data_path
+    - data_preprocessing.train_file_path
+    - data_preprocessing.test_file_path
+    - feature_engineering.test_size
+    - feature_engineering.random_state
+    outs: 
+    - data/processed/test.csv
+    - data/processed/train.csv
+  
+  feature_engineering:
+    cmd: python src/components/feature_engineering.py
+    deps:
+    - src/components/feature_engineering.py
+    - src/utils/main_utils.py
+    - src/exception/__init__.py
+    - src/logger/__init__.py
+    - data/processed/test.csv
+    - data/processed/train.csv
+    - src/configs/best_params.yaml
+    params:
+    - feature_engineering.best_parameters_file_path
+    - feature_engineering.vectorized_x_train_file_path
+    - feature_engineering.vectorized_y_train_file_path
+    - feature_engineering.vectorized_x_test_file_path
+    - feature_engineering.vectorized_y_test_file_path
+    - feature_engineering.preprocessed_model_file_path
+    - randomized_cv_search
+    outs:
+    - data/vectorized/x_test.npz
+    - data/vectorized/x_train.npz
+    - data/vectorized/y_test.csv
+    - data/vectorized/y_train.csv
+    - models/processing.pkl
+  
+  model_training:
+    cmd: python src/components/model_training.py
+    deps:
+    - src/components/model_training.py
+    - src/utils/main_utils.py
+    - src/exception/__init__.py
+    - src/logger/__init__.py
+    - data/vectorized/x_test.npz
+    - data/vectorized/x_train.npz
+    - data/vectorized/y_test.csv
+    - data/vectorized/y_train.csv
+    - src/configs/best_params.yaml
+    params:
+    - feature_engineering.best_parameters_file_path
+    - feature_engineering.vectorized_x_train_file_path
+    - feature_engineering.vectorized_x_test_file_path
+    - feature_engineering.vectorized_y_train_file_path
+    - feature_engineering.vectorized_y_test_file_path
+    - model_training.model_file_path
+    outs:
+    - models/model.pkl
+  
+  model_evaluation:
+    cmd: python src/components/model_evaluation.py
+    deps:
+    - src/components/model_evaluation.py
+    - src/utils/main_utils.py
+    - src/exception/__init__.py
+    - src/logger/__init__.py
+    - src/configs/best_params.yaml
+    - models/model.pkl
+    - data/vectorized/y_test.csv
+    - data/vectorized/x_test.npz
+    params:
+    - model_evaluation
+    - model_training.model_file_path
+    - feature_engineering.best_parameters_file_path
+    - feature_engineering.vectorized_y_test_file_path
+    - feature_engineering.vectorized_x_test_file_path
+    - mlflow
+    outs:
+    - src/configs/model_info.json
+    - src/configs/model_metrics.yaml
+    - src/configs/validation_report.json
+  
+  model_registry:
+    cmd: python src/components/model_registry.py
+    deps:
+    - src/components/model_registry.py
+    - src/utils/main_utils.py
+    - src/exception/__init__.py
+    - src/logger/__init__.py
+    - src/configs/model_info.json
+    - src/configs/validation_report.json
+    params:
+    - model_evaluation.model_info_path
+    - model_evaluation.validation_report_path
+    - model_registry
+    - mlflow

@@ -17,6 +17,7 @@ import numpy as np
 class FeatureEngineering:
       def __init__(self):
             self.params = read_yaml_file('params.yaml')
+            self.random_state = self.params['feature_engineering']['random_state']
             self.processed_train_file = self.params['data_preprocessing']['train_file_path']
             self.processed_test_file = self.params['data_preprocessing']['test_file_path']
             self.best_params_file_path = self.params['feature_engineering']['best_parameters_file_path']
@@ -37,17 +38,18 @@ class FeatureEngineering:
                   print(train_df["review"].dtype)
                   print(train_df["review"].isna().sum())
                   print(train_df["review"].map(type).value_counts())
-                  print(train_df["review"].head())
+                  print(train_df["review"].shape)
 
                   param = self.get_best_params(
                         train_df['review'],
                         train_df['sentiment']
-                  )
+                  ) 
 
                   logging.info(f" best params for tfidf vectorizer is - {param}")
 
                   tfidf_params = param['feature_engineering']
 
+                  logging.info("starting tfidf vectorization ")
                   vectorizer = TfidfVectorizer(**tfidf_params)
 
                   X_train = vectorizer.fit_transform(train_df["review"])
@@ -60,7 +62,7 @@ class FeatureEngineering:
                   os.makedirs(os.path.dirname(self.vectorized_test_file_path) , exist_ok=True)
                   save_npz( self.vectorized_train_file_path , X_train)
                   save_npz( self.vectorized_test_file_path , X_test)
-                  logging.info("saved vectorized train test data successfully ")
+                  logging.info("saved vectorized train test target values successfully in vectors ")
                   
                   save_DataFrame(self.vectorized_y_train_file_path , y_train)
                   save_DataFrame(self.vectorized_y_test_file_path , y_test)
@@ -75,6 +77,7 @@ class FeatureEngineering:
                 
       def get_best_params(self , X_train , y_train ):
             try:
+                  logging.info("entered inside get_best_params method ")
                   if os.path.exists(self.best_params_file_path):
                         logging.info("Loading saved best parameters")
                         
@@ -96,7 +99,7 @@ class FeatureEngineering:
                   pipeline = Pipeline([
                       ("tfidf", TfidfVectorizer()),
                       ("classifier", SGDClassifier(
-                          random_state=self.random_cv_params['random_state']
+                          random_state=self.random_state
                       )),
                   ])
                   
@@ -129,7 +132,7 @@ class FeatureEngineering:
                   cv = StratifiedKFold(
                       n_splits=5,
                       shuffle=True,
-                      random_state=42
+                      random_state=self.random_state
                   )
 
                   search = RandomizedSearchCV(
@@ -144,12 +147,15 @@ class FeatureEngineering:
                       cv=cv,
                       **self.random_cv_params
                   )
-
+                  
+                  logging.info("starting randomized cv search ")
                   # X_train_text must contain cleaned text, not TF-IDF features
                   search.fit(X_train , y_train)
                   
+                  logging.info('randomized cv search is over and fitting is complete')
                   # 4. Separate parameters by pipeline step
                   best = search.best_params_
+                  logging.info(f'best pramas for randomized cv search is - {best} ')
                   
                   feature_params = {
                       key.removeprefix("tfidf__"): value
@@ -172,8 +178,7 @@ class FeatureEngineering:
                   
                   # 5. Save the YAML file
                   write_yaml_file(self.best_params_file_path,yaml_result)
-                      
-                  logging.info("Best parameters saved successfully")
+                  logging.info(f"best params saved in path - {self.best_params_file_path}")    
                   logging.info(f"Best CV score: {search.best_score_:.4f}")
 
                   return result
@@ -183,6 +188,7 @@ class FeatureEngineering:
       
 
       def convert_numpy_types(self ,params):
+          logging.info(f"enterd convert_numpy_types method ")
           if isinstance(params, dict):
               return {
                   key: self.convert_numpy_types(value)

@@ -12,9 +12,9 @@ feature_engineering:
   random_state: 42
   max_features: 50
   vectorized_x_train_file_path: "data/vectorized/x_train.npz"
-  vectorized_y_train_file_path: "data/vectorized/y_train.npz"
+  vectorized_y_train_file_path: "data/vectorized/y_train.csv"
   vectorized_x_test_file_path: "data/vectorized/x_test.npz"
-  vectorized_y_test_file_path: "data/vectorized/y_test.npz"
+  vectorized_y_test_file_path: "data/vectorized/y_test.csv"
   preprocessed_model_file_path: "models/processing.pkl"
 
 model_training:

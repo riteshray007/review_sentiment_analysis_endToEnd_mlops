@@ -29,43 +29,59 @@ class modelEvaluation:
             dagshub.init( **self.params['mlflow']['dagshub'] )
 
       def eval_metrics(self , model , x_test , y_test):
-            y_pred = model.predict(x_test)
-            y_pred_prob = model.predict_proba(x_test)[:,1]
-            
-            metrics = {
-                  "accuracy" : accuracy_score(y_test , y_pred),
-                  "precision" : precision_score(y_test , y_pred),
-                  "recall" : recall_score(y_test , y_pred),
-                  "f1_score" : f1_score(y_test , y_pred ),
-                  "auc_score" : roc_auc_score(y_test , y_pred_prob)
-            }
-            
-            logging.info("model's metrics calculated  ")
-            
-            return metrics
+            try:
+                  logging.info(f"starting model evaluation ")
+                  y_pred = model.predict(x_test)
+      #  since hinge loss in sgd classifier does not provide predict_proba so we need to calculate auc using decision function
+      # . we cann't just use predict_prob on whole model without checking the model's loss parameter
+                  if model.loss in {"log_loss", "modified_huber"}:
+                      y_score = model.predict_proba(x_test)[:, 1]
+                  else:
+                      y_score = model.decision_function(x_test)
+
+                  auc = roc_auc_score(y_test, y_score)
+
+                  # y_pred_prob = model.predict_proba(x_test)[:,1]
+
+                  metrics = {
+                        "accuracy" : accuracy_score(y_test , y_pred),
+                        "precision" : precision_score(y_test , y_pred),
+                        "recall" : recall_score(y_test , y_pred),
+                        "f1_score" : f1_score(y_test , y_pred ),
+                        "auc_score" : auc
+                  }
+
+                  logging.info("model's metrics calculated and returned  ")
+
+                  return metrics
+            except Exception as e:
+                  raise MyException(e,sys) from e
 
       def build_validation_report(self, metrics, run_id):
             """Evaluate configured metric floors and return a registry-ready report."""
-            checks = {}
-            for metric_name, threshold in self.validation_thresholds.items():
-                  if metric_name not in metrics:
-                        raise ValueError(f"Threshold configured for unknown metric: {metric_name}")
+            try:
+                  logging.info(f"entered inside build_validation_report method ")
+                  checks = {}
+                  for metric_name, threshold in self.validation_thresholds.items():
+                        if metric_name not in metrics:
+                              raise ValueError(f"Threshold configured for unknown metric: {metric_name}")
 
-                  actual = float(metrics[metric_name])
-                  checks[metric_name] = {
-                        "actual": actual,
-                        "minimum": float(threshold),
-                        "passed": actual >= float(threshold),
+                        actual = float(metrics[metric_name])
+                        checks[metric_name] = {
+                              "actual": actual,
+                              "minimum": float(threshold),
+                              "passed": actual >= float(threshold),
+                        }
+                  logging.info("returned validation matric sucessfully ")
+                  return {
+                        "run_id": run_id,
+                        "metrics": {name: float(value) for name, value in metrics.items()},
+                        "thresholds": self.validation_thresholds,
+                        "checks": checks,
+                        "status": "passed" if all(check["passed"] for check in checks.values()) else "failed",
                   }
-
-            return {
-                  "run_id": run_id,
-                  "metrics": {name: float(value) for name, value in metrics.items()},
-                  "thresholds": self.validation_thresholds,
-                  "checks": checks,
-                  "status": "passed" if all(check["passed"] for check in checks.values()) else "failed",
-            }
-
+            except Exception as e:
+                  raise MyException(e,sys) from e
       def save_validation_report(self, report):
             """Persist the report consumed by the model registry gate."""
             os.makedirs(os.path.dirname(self.validation_report_path), exist_ok=True)
@@ -74,7 +90,8 @@ class modelEvaluation:
             
 
       def experiment_tracking(self , model , x_test , y_test):
-            try:
+            try:  
+                  logging.info("starting experiment tracking ")
                   mlflow.set_experiment("my-dvc-experiments")
                   with mlflow.start_run() as run:
                         metrics = self.eval_metrics(model , x_test , y_test)
@@ -97,6 +114,7 @@ class modelEvaluation:
                               sk_model=model,
                               name="model"
                         )
+                        logging.info("model parameters & model logged in mlflow")
                         
                         self.save_model_info(
                               run.info.run_id,
@@ -107,6 +125,8 @@ class modelEvaluation:
 
                         mlflow.log_artifact(self.model_eval_metrics_path)
                         mlflow.log_artifact(self.validation_report_path)
+                        logging.info("model parameters & model artifacts logged in mlflow")
+                        
                               
             except Exception as e:
                   raise MyException(e,sys) from e   
