@@ -1,5 +1,9 @@
+import html
 import os
+import re
 import sys
+import contractions
+import emoji
 
 import numpy as np
 import pandas as pd
@@ -98,4 +102,66 @@ def save_obj(file_path:str , obj:object)->None:
             logging.info('exited the save obj method ')
       except Exception as e:
             raise MyException(e,sys) from e
+
+            
+def clean_text_batch(values):
+      if isinstance(values, pd.DataFrame):
+          texts = values.iloc[:, 0].tolist()
+      elif isinstance(values, pd.Series):
+          texts = values.tolist()
+      else:
+          values = np.asarray(values, dtype=object)
+          if values.ndim == 2:
+              if values.shape[1] != 1:
+                  raise ValueError("Expected one review-text column.")
+              texts = values[:, 0].tolist()
+          else:
+              texts = values.tolist()
+      return [clean_review(text) for text in texts]
       
+def clean_review( text):
+      """Conservative text normalization for sentiment analysis."""
+      # 1. Handle missing values safely
+      if pd.isna(text):
+        return ""
+  
+      text = str(text)
+      # 2. Decode HTML entities, e.g. &amp; -> &
+      text = html.unescape(text)            
+      # 3. Remove HTML tags common in IMDB reviews
+      text = re.sub(r"<[^>]+>", " ", text)
+      # 4. Replace URLs with a placeholder
+      text = re.sub(
+          r"(https?://\S+|www\.\S+)",
+          " URLTOKEN ",
+          text,
+          flags=re.IGNORECASE
+      )
+      # 5. Normalize common emoticons before punctuation removal
+      emoticons = {
+          r":-?\)": "POSITIVEEMOTION",
+          r";-?\)": " POSITIVEEMOTION ",
+          r":-?\(": " NEGATIVEEMOTION ",
+          r"<3": " HEARTTOKEN ",
+          r":-?D": " POSITIVEEMOTION "
+      }
+      
+      for pattern, replacement in emoticons.items():
+          text = re.sub(
+              pattern,
+              replacement,
+              text,
+              flags=re.IGNORECASE
+          )
+      # 6. Convert emojis into descriptive words
+      text = emoji.demojize(text, delimiters=(" ", " "))
+      # 7. Expand contractions: didn't -> did not
+      text = contractions.fix(text)
+      # 8. Normalize case
+      text = text.lower()
+      # 9. Remove apostrophes and punctuation without
+      # joining adjacent words together
+      text = re.sub(r"[^\w\s]", " ", text)
+      # 10. Keep digits initially; normalize whitespace
+      text = re.sub(r"\s+", " ", text).strip()
+      return text

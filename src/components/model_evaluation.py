@@ -12,7 +12,9 @@ import os
 import json
 from src.utils.main_utils import load_DataFrame , load_object , read_yaml_file , write_yaml_file 
 from sklearn.metrics import accuracy_score , recall_score , precision_score , f1_score , roc_auc_score
-
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import FunctionTransformer
+from src.utils.main_utils import  load_object , clean_text_batch
 
 class modelEvaluation:
       def __init__(self):
@@ -25,6 +27,7 @@ class modelEvaluation:
             self.x_test_file_path = self.params['feature_engineering']['vectorized_x_test_file_path'] 
             self.y_test_file_path = self.params['feature_engineering']['vectorized_y_test_file_path'] 
             self.best_params = self.params['feature_engineering']['best_parameters_file_path']
+            self.vectorizer_path = self.params["feature_engineering"]["preprocessed_model_file_path"]
             mlflow.set_tracking_uri(self.params['mlflow']['tracking_uri'])
             dagshub.init( **self.params['mlflow']['dagshub'] )
 
@@ -57,6 +60,7 @@ class modelEvaluation:
             except Exception as e:
                   raise MyException(e,sys) from e
 
+
       def build_validation_report(self, metrics, run_id):
             """Evaluate configured metric floors and return a registry-ready report."""
             try:
@@ -82,6 +86,7 @@ class modelEvaluation:
                   }
             except Exception as e:
                   raise MyException(e,sys) from e
+            
       def save_validation_report(self, report):
             """Persist the report consumed by the model registry gate."""
             os.makedirs(os.path.dirname(self.validation_report_path), exist_ok=True)
@@ -110,9 +115,18 @@ class modelEvaluation:
                         
                         mlflow.log_params(model_params)
                         
+                        vectorizer = load_object(self.vectorizer_path)
+
+                        inference_model = Pipeline([
+                            ("clean_text", FunctionTransformer(clean_text_batch, validate=False)),
+                            ("tfidf", vectorizer),
+                            ("classifier", model),
+                        ])
+                        
                         logged_model_info = mlflow.sklearn.log_model(
-                              sk_model=model,
-                              name="model"
+                              sk_model=inference_model,
+                              name="model",
+                              skops_trusted_types=["src.utils.main_utils.clean_text_batch"],
                         )
                         logging.info("model parameters & model logged in mlflow")
                         

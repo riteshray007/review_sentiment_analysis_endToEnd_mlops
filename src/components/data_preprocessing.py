@@ -1,15 +1,13 @@
 import sys
 from src.exception import MyException
 from src.logger import logging
-from src.utils.main_utils import read_yaml_file , load_DataFrame  , save_DataFrame
+from src.utils.main_utils import read_yaml_file , load_DataFrame  , save_DataFrame , clean_review
 import pandas as pd
 import numpy as np
 import re
 import html
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
-import contractions
-import emoji
+
+
 from sklearn.model_selection import train_test_split
 import os
 
@@ -30,7 +28,7 @@ class DataPreProcessing:
                   df = self.validate_and_normalize_labels(df)
 
                   logging.info("started clean review method ")
-                  df["review"] = df["review"].apply(self.clean_review)
+                  df["review"] = df["review"].apply(clean_review)
 
                   # Remove reviews that become empty after cleaning
                   df = df[df["review"].str.strip().ne("")].copy()
@@ -39,65 +37,6 @@ class DataPreProcessing:
             
             except Exception as e:
                   raise MyException(e , sys ) from e
- 
-      def clean_review(self , text):
-          """Conservative text normalization for sentiment analysis."""
-
-          # 1. Handle missing values safely
-          if pd.isna(text):
-            return ""
-
-          text = str(text)
-
-          # 2. Decode HTML entities, e.g. &amp; -> &
-          text = html.unescape(text)            
-
-          # 3. Remove HTML tags common in IMDB reviews
-          text = re.sub(r"<[^>]+>", " ", text)
-
-          # 4. Replace URLs with a placeholder
-          text = re.sub(
-              r"(https?://\S+|www\.\S+)",
-              " URLTOKEN ",
-              text,
-              flags=re.IGNORECASE
-          )
-
-          # 5. Normalize common emoticons before punctuation removal
-          emoticons = {
-              r":-?\)": "POSITIVEEMOTION",
-              r";-?\)": " POSITIVEEMOTION ",
-              r":-?\(": " NEGATIVEEMOTION ",
-              r"<3": " HEARTTOKEN ",
-              r":-?D": " POSITIVEEMOTION "
-          }
-          
-
-          for pattern, replacement in emoticons.items():
-              text = re.sub(
-                  pattern,
-                  replacement,
-                  text,
-                  flags=re.IGNORECASE
-              )
-
-          # 6. Convert emojis into descriptive words
-          text = emoji.demojize(text, delimiters=(" ", " "))
-
-          # 7. Expand contractions: didn't -> did not
-          text = contractions.fix(text)
-
-          # 8. Normalize case
-          text = text.lower()
-
-          # 9. Remove apostrophes and punctuation without
-          # joining adjacent words together
-          text = re.sub(r"[^\w\s]", " ", text)
-
-          # 10. Keep digits initially; normalize whitespace
-          text = re.sub(r"\s+", " ", text).strip()
-
-          return text
 
       
       def validate_and_normalize_labels(self ,df):

@@ -16,7 +16,8 @@ dill
 PyYAML
 boto3
 dvc-s3
-
+Flask
+prometheus-client
 
 
 

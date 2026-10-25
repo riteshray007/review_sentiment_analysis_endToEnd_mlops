@@ -91,12 +91,14 @@ stages:
     - models/model.pkl
     - data/vectorized/y_test.csv
     - data/vectorized/x_test.npz
+    - models/processing.pkl
     params:
     - model_evaluation
     - model_training.model_file_path
     - feature_engineering.best_parameters_file_path
     - feature_engineering.vectorized_y_test_file_path
     - feature_engineering.vectorized_x_test_file_path
+    - feature_engineering.preprocessed_model_file_path
     - mlflow
     outs:
     - src/configs/model_info.json
