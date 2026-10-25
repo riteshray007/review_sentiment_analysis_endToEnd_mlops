@@ -9,6 +9,9 @@ stages:
     - src/s3_services/s3_connection.py
     params:
     - data_ingestion.raw_data_path
+    - data_ingestion.bucket_name
+    - data_ingestion.object_key
+    - data_ingestion.version_id
     outs:
     - data/raw/data.csv
   

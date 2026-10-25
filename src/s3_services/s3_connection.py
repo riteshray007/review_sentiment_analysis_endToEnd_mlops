@@ -1,6 +1,5 @@
 import boto3
 import pandas as pd
-import logging
 from src.logger import logging
 from io import StringIO
 
@@ -19,20 +18,21 @@ class s3_operations:
         )
         logging.info("Data Ingestion from S3 bucket initialized")
 
-    def fetch_file_from_s3(self, file_key):
+    def fetch_file_from_s3(self, file_key , version_id ):
         """
-        Fetches a CSV file from the S3 bucket and returns it as a Pandas DataFrame.
+        Fetches a CSV file of then mentioned versionId from the S3 bucket and returns it as a Pandas DataFrame.
         :param file_key: S3 file path (e.g., 'data/data.csv')
+        :param version_id: file key's version_id
         :return: Pandas DataFrame
         """
         try:
-            logging.info(f"Fetching file '{file_key}' from S3 bucket '{self.bucket_name}'...")
-            obj = self.s3_client.get_object(Bucket=self.bucket_name, Key=file_key)
+            logging.info(f"Fetching file {file_key} with version_id {version_id} from S3 bucket '{self.bucket_name}'...")
+            obj = self.s3_client.get_object(Bucket=self.bucket_name, Key=file_key , VersionId=version_id)
             df = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8')))
-            logging.info(f"Successfully fetched and loaded '{file_key}' from S3 that has {len(df)} records.")
+            logging.info(f"Successfully fetched and loaded {file_key} from S3 that has {len(df)} records.")
             return df
         except Exception as e:
-            logging.exception(f"❌ Failed to fetch '{file_key}' from S3: {e}")
-            return None
+            logging.exception(f"❌ Failed to fetch {file_key} with versionId - {version_id} from S3: {e}")
+            raise
 
 

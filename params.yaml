@@ -1,6 +1,9 @@
 # params.yaml
 data_ingestion:
   raw_data_path: "data/raw/data.csv"
+  bucket_name: "dataset-storage-versoining-enabled"
+  object_key: "data.csv"
+  version_id: "H_02Ey29YdEo0mHevb2117Y.VKBx2abc"
   
 data_preprocessing:  
   train_file_path: "data/processed/train.csv"

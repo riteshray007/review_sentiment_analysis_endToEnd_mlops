@@ -15,6 +15,7 @@ kagglehub
 dill
 PyYAML
 boto3
+dvc-s3
 
 
 

@@ -12,23 +12,23 @@ class DataIngestion:
       
       def __init__(self):
             self.params = read_yaml_file("params.yaml")
-            self.raw_file_path = self.params['data_ingestion']['raw_data_path']
-      
+            self.raw_file_path = self.params["data_ingestion"]["raw_data_path"]
+            self.bucket_name = self.params["data_ingestion"]["bucket_name"]
+            self.object_key = self.params["data_ingestion"]["object_key"]
+            self.version_id = self.params["data_ingestion"]["version_id"]      
       def start_ingestion(self):
             try:
                   logging.info(" starting data loading process ")
+                  logging.info("initiating connection to s3 ")
+                  s3 = s3_connection.s3_operations(self.bucket_name , os.getenv('AWS_ACCESS_KEY_ID') ,os.getenv('AWS_SECRET_ACCESS_KEY') )
+                  print(s3)
+                  df = s3.fetch_file_from_s3(self.object_key, version_id = self.version_id)
+                  logging.info( f" pulled dataframe of len - {len(df)}")
+                  
+                  final_df = self.validate_data(df)
+                  save_DataFrame( self.raw_file_path , final_df )
 
-                  if not os.path.exists(self.raw_file_path):
-                        logging.info("initiating connection to s3 ")
-                        s3 = s3_connection.s3_operations("sentiment-analysis-review-data", os.getenv('AWS_ACCESS_KEY_ID') ,os.getenv('AWS_SECRET_ACCESS_KEY') )
-                        df = s3.fetch_file_from_s3("IMDB Dataset.csv")
-                        logging.info( f" pulled dataframe of len - {len(df)}")
-                        
-                        final_df = self.validate_data(df)
-                        save_DataFrame( self.raw_file_path , final_df )
-                  else:
-                        logging.info("raw data file already exists")     
-                        logging.info("exiting data ingestion ")     
+                  logging.info("exiting data ingestion ")     
             except Exception as e:
                   logging.error(f"error= {e}")
                   raise MyException(e,sys) from e

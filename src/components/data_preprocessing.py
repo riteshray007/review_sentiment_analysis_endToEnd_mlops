@@ -50,7 +50,7 @@ class DataPreProcessing:
           text = str(text)
 
           # 2. Decode HTML entities, e.g. &amp; -> &
-          text = html.unescape(text)
+          text = html.unescape(text)            
 
           # 3. Remove HTML tags common in IMDB reviews
           text = re.sub(r"<[^>]+>", " ", text)

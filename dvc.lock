@@ -5,8 +5,8 @@ stages:
     deps:
     - path: src/components/data_ingestion.py
       hash: md5
-      md5: 99f9086ed251eaeee6c1bc830e90b97e
-      size: 2136
+      md5: 792087922d7af33b7d00e00f2c67bfc4
+      size: 2192
     - path: src/exception/__init__.py
       hash: md5
       md5: 8c2110cbf34a8d8feba965bfe6b9b0a6
@@ -17,15 +17,18 @@ stages:
       size: 1419
     - path: src/s3_services/s3_connection.py
       hash: md5
-      md5: 0ca4e3ffd52b1e08fbac0053e56ec052
-      size: 1457
+      md5: ec2c3ba85ec345b139d8866b859bfafa
+      size: 1603
     - path: src/utils/main_utils.py
       hash: md5
       md5: 7765feb28cc1b184f40aa1894ec7e6a3
       size: 3130
     params:
       params.yaml:
+        data_ingestion.bucket_name: dataset-storage-versoining-enabled
+        data_ingestion.object_key: data.csv
         data_ingestion.raw_data_path: data/raw/data.csv
+        data_ingestion.version_id: H_02Ey29YdEo0mHevb2117Y.VKBx2abc
     outs:
     - path: data/raw/data.csv
       hash: md5
@@ -40,8 +43,8 @@ stages:
       size: 66262310
     - path: src/components/data_preprocessing.py
       hash: md5
-      md5: d3e2e9ed6df39481d9b8cf6273a0021d
-      size: 6054
+      md5: 844867d50ee428ed83b331c664e52d0b
+      size: 6066
     - path: src/exception/__init__.py
       hash: md5
       md5: 8c2110cbf34a8d8feba965bfe6b9b0a6
