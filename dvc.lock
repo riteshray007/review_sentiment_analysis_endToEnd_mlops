@@ -224,8 +224,8 @@ stages:
       size: 1947566
     - path: src/components/model_evaluation.py
       hash: md5
-      md5: b4d36d2cf19738a8edb87209ad56c8ad
-      size: 9275
+      md5: d33b1c6dbe813a13574ad7db549606e5
+      size: 9305
     - path: src/configs/best_params.yaml
       hash: md5
       md5: 41088fe1e606d55ccdab0c2ba8710bea
@@ -272,7 +272,7 @@ stages:
     outs:
     - path: src/configs/model_info.json
       hash: md5
-      md5: 10016b444c276a6d6378f80008b5bd05
+      md5: f693c85b3ab09cf20d3c339332f8bf95
       size: 229
     - path: src/configs/model_metrics.yaml
       hash: md5
@@ -280,22 +280,22 @@ stages:
       size: 124
     - path: src/configs/validation_report.json
       hash: md5
-      md5: a2697cc12727c74db5ce5a876146bf79
+      md5: 2d59683fa74c50c3bcdfe343ce86f434
       size: 934
   model_registry:
     cmd: python src/components/model_registry.py
     deps:
     - path: src/components/model_registry.py
       hash: md5
-      md5: b51f55c16f9151e46fce485417bf4802
+      md5: 948e92aa6b2006198e826e652926b085
       size: 5723
     - path: src/configs/model_info.json
       hash: md5
-      md5: 10016b444c276a6d6378f80008b5bd05
+      md5: f693c85b3ab09cf20d3c339332f8bf95
       size: 229
     - path: src/configs/validation_report.json
       hash: md5
-      md5: a2697cc12727c74db5ce5a876146bf79
+      md5: 2d59683fa74c50c3bcdfe343ce86f434
       size: 934
     - path: src/exception/__init__.py
       hash: md5

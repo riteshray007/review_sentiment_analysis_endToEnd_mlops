@@ -18,9 +18,8 @@ class ModelRegistry:
             self.validation_report_path = evaluation_config["validation_report_path"]
             self.model_name = registry_config["model_name"]
             self.staging_alias = registry_config["staging_alias"]
-
             mlflow.set_tracking_uri(self.params["mlflow"]["tracking_uri"])
-            dagshub.init(**self.params["mlflow"]["dagshub"])
+            # dagshub.init(**self.params["mlflow"]["dagshub"])
 
       @staticmethod
       def load_json(file_path: str) -> dict:

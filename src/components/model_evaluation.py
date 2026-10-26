@@ -29,7 +29,9 @@ class modelEvaluation:
             self.best_params = self.params['feature_engineering']['best_parameters_file_path']
             self.vectorizer_path = self.params["feature_engineering"]["preprocessed_model_file_path"]
             mlflow.set_tracking_uri(self.params['mlflow']['tracking_uri'])
-            dagshub.init( **self.params['mlflow']['dagshub'] )
+            # dagshub.init( **self.params['mlflow']['dagshub'] )
+            
+            
 
       def eval_metrics(self , model , x_test , y_test):
             try:

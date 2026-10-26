@@ -73,8 +73,31 @@ def metrics():
     """Expose only custom Prometheus metrics."""
     return generate_latest(registry), 200, {"Content-Type": CONTENT_TYPE_LATEST}
       
+@app.route("/predict" , methods=["POST"])
+def predict_sentiment():
+      REQUEST_COUNT.labels(method="POST", endpoint="/predict").inc()
+      start_time = time.time()
+      
+      if not latest_ml_model:
+            load_staging_model()
+      
+      text = request.form["text"]
+      
+      print(text)
+      print(type(text))
+      df = pd.DataFrame({"review":[text]})
+      
+      print(type(df))
+      print(df)
+      
+      result = latest_ml_model.predict(df)[0]
+      # Increment prediction count metric
+      PREDICTION_COUNT.labels(prediction=str(result)).inc()
 
+      # Measure latency
+      REQUEST_LATENCY.labels(endpoint="/predict").observe(time.time() - start_time)
 
+      return render_template("index.html", result=result)
 
 
 if __name__ == "__main__":
