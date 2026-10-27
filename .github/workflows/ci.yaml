@@ -1,6 +1,15 @@
 name: CI pipeline
 
-on: push
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
+      - 'notebooks/**'
+      - 'docs/**'
+  workflow_dispatch:
 
 jobs:
   project_testing:
@@ -11,20 +20,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: setup python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          cache: 'pip'
 
       - name: install dependencies
         run: |
+          python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
 
       - name: run pipeline
