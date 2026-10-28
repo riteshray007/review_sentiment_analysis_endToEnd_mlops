@@ -37,7 +37,8 @@ model_evaluation:
 model_registry:
   model_name: "SGDxTFIDF_MODEL"
   staging_alias: "staging"
-
+  production_alias: "production"
+  pre_production: "previous_production"
 
 mlflow:
   tracking_uri: "https://dagshub.com/riteshray007/review_sentiment_analysis_endToEnd_mlops.mlflow"

@@ -3,6 +3,7 @@ from pathlib import Path
 
 project_name = 'src'
 note_book='notebooks'
+flask_app = "flask-app"
 
 list_of_files = [
       f"{project_name}/__init__.py",
@@ -26,8 +27,12 @@ list_of_files = [
       f"{note_book}/exp1.ipynb",
       f"{note_book}/exp2_bow_vs_tfidf.py",
       f"{note_book}/exp3_lor_bow_hp.py",
+      "tests/test_model.py",
+      "scripts/promote_model.py",
+      f"{flask_app}/app.py",
+      f"{flask_app}/templates/index.html",
       "local_s3/__init__.py",
-      "params.yaml"
+      "params.yaml",
 ]
 
 for filepath in list_of_files:
