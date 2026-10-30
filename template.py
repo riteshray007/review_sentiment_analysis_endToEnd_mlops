@@ -28,11 +28,15 @@ list_of_files = [
       f"{note_book}/exp2_bow_vs_tfidf.py",
       f"{note_book}/exp3_lor_bow_hp.py",
       "tests/test_model.py",
+      "tests/test_flask_app.py",
       "scripts/promote_model.py",
       f"{flask_app}/app.py",
+      f"{flask_app}/requirements.txt",
       f"{flask_app}/templates/index.html",
       "local_s3/__init__.py",
       "params.yaml",
+      ".dockerignore",
+      "Dockerfile"
 ]
 
 for filepath in list_of_files:

@@ -1,0 +1,40 @@
+# DVC and Data
+.dvc/
+.dvcignore
+data/
+dvc.lock
+dvc.yaml
+
+# Training & Experiment tracking
+models/
+mlruns/
+mlflow.db
+notebooks/
+scripts/
+tests/
+credentials.txt
+
+# Unused src modules for serving
+src/components/
+src/configs/
+src/entity/
+src/s3_services/
+
+# Unneeded root files
+requirements.txt
+README.md
+LICENSE
+demo.py
+template.py
+
+# Git & IDE
+.git/
+.github/
+.vscode/
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+logs/
+*.log

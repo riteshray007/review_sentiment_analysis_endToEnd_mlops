@@ -6,7 +6,7 @@ import os
 import pandas as pd
 from prometheus_client import Counter, Histogram, generate_latest, CollectorRegistry, CONTENT_TYPE_LATEST
 import time
-import dagshub
+# import dagshub
 from src.utils.main_utils import clean_review , read_yaml_file
 from src.logger import logging
 from src.exception import MyException
@@ -21,11 +21,11 @@ app = Flask(__name__)
 param = read_yaml_file("params.yaml")
 mlflow_tracking_uri = param["mlflow"]["tracking_uri"]
 logging.info(f'tracking uri loaded - {mlflow_tracking_uri}')
-dagshub_params = param['mlflow']['dagshub']
-logging.info(f'dagshub params loaded - {dagshub_params}')
+# dagshub_params = param['mlflow']['dagshub']
+# logging.info(f'dagshub params loaded - {dagshub_params}')
 
 mlflow.set_tracking_uri(mlflow_tracking_uri)
-dagshub.init(**dagshub_params)
+# dagshub.init(**dagshub_params)
 
 # from prometheus_client import CollectorRegistry
 
@@ -44,7 +44,7 @@ PREDICTION_COUNT = Counter(
 )
 
 model_name = param['model_registry']['model_name']
-model_alias = param['model_registry']['staging_alias']
+model_alias = param['model_registry']['production_alias']
 
 def load_staging_model():
       """Load the model currently assigned to the configured MLflow staging alias."""
