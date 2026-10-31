@@ -59,13 +59,13 @@ def load_staging_model():
 latest_ml_model = load_staging_model()
 
 
-@app.route('/')
-def home():
-    REQUEST_COUNT.labels(method="GET", endpoint="/").inc()
-    start_time = time.time()
-    response = render_template("index.html", result=None)
-    REQUEST_LATENCY.labels(endpoint="/").observe(time.time() - start_time)
-    return response
+# @app.route('/')
+# def home():
+#     REQUEST_COUNT.labels(method="GET", endpoint="/").inc()
+#     start_time = time.time()
+#     response = render_template("index.html", result=None)
+#     REQUEST_LATENCY.labels(endpoint="/").observe(time.time() - start_time)
+    # return response
 
 @app.route('/healthz', methods=['GET'])
 def health_check():
@@ -76,31 +76,35 @@ def metrics():
     """Expose only custom Prometheus metrics."""
     return generate_latest(registry), 200, {"Content-Type": CONTENT_TYPE_LATEST}
       
-@app.route("/predict" , methods=["POST"])
-def predict_sentiment():
-      REQUEST_COUNT.labels(method="POST", endpoint="/predict").inc()
-      start_time = time.time()
       
-      if not latest_ml_model:
-            load_staging_model()
-      
-      text = request.form["text"]
-      
-      print(text)
-      print(type(text))
-      df = pd.DataFrame({"review":[text]})
-      
-      print(type(df))
-      print(df)
-      
-      result = latest_ml_model.predict(df)[0]
-      # Increment prediction count metric
-      PREDICTION_COUNT.labels(prediction=str(result)).inc()
+@app.route("/", methods=["GET", "POST"])
+@app.route("/predict", methods=["POST"])
+def home():
+    if request.method == "POST":
+        REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
+        start_time = time.time()
+        
+        global latest_ml_model
+        if not latest_ml_model:
+            latest_ml_model = load_staging_model()
+            
+        text = request.form.get("text", "")
+        df = pd.DataFrame({"review": [text]})
+        result = latest_ml_model.predict(df)[0]
 
-      # Measure latency
-      REQUEST_LATENCY.labels(endpoint="/predict").observe(time.time() - start_time)
+        PREDICTION_COUNT.labels(prediction=str(result)).inc()
+        REQUEST_LATENCY.labels(endpoint=request.path).observe(time.time() - start_time)
 
-      return render_template("index.html", result=result)
+        # Return JSON for frontend fetch and CI/CD tests
+        sentiment = "Positive" if result == 1 else "Negative"
+        return {"result": int(result), "sentiment": sentiment}, 200
+
+    # GET request
+    REQUEST_COUNT.labels(method=request.method, endpoint=request.path).inc()
+    start_time = time.time()
+    response = render_template("index.html")
+    REQUEST_LATENCY.labels(endpoint=request.path).observe(time.time() - start_time)
+    return response
 
 
 if __name__ == "__main__":
