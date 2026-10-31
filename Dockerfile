@@ -29,4 +29,9 @@ EXPOSE 5000
 # CMD ["python", "app.py"]
 
 # Option B: Production WSGI server (active by default)
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "app:app"]
+# CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "app:app"]
+
+# use threaded workers and realistic timeouts
+# --threads 4: Allows health checks to slip through instantly even when heavy inference or Prometheus scrapes are running.
+# --timeout 120: Prevents Gunicorn from prematurely killing workers during occasional garbage collection.
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--threads", "4", "--worker-class", "gthread", "--timeout", "120", "app:app"]

@@ -4,6 +4,7 @@ from pathlib import Path
 project_name = 'src'
 note_book='notebooks'
 flask_app = "flask-app"
+k8s = "k8s"
 
 list_of_files = [
       f"{project_name}/__init__.py",
@@ -22,7 +23,6 @@ list_of_files = [
       f"{project_name}/utils/__init__.py",
       f"{project_name}/utils/main_utils.py",
       "requirements.txt",
-      "demo.py",
       "pyproject.toml",
       f"{note_book}/exp1.ipynb",
       f"{note_book}/exp2_bow_vs_tfidf.py",
@@ -36,7 +36,10 @@ list_of_files = [
       "local_s3/__init__.py",
       "params.yaml",
       ".dockerignore",
-      "Dockerfile"
+      "Dockerfile",
+      f"{k8s}/grafana-values.yaml",
+      f"{k8s}/flask-deployment.yaml",
+      f"{k8s}/prometheus-values.yaml",
 ]
 
 for filepath in list_of_files:

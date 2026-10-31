@@ -67,6 +67,9 @@ def home():
     REQUEST_LATENCY.labels(endpoint="/").observe(time.time() - start_time)
     return response
 
+@app.route('/healthz', methods=['GET'])
+def health_check():
+    return "healthy", 200
 
 @app.route("/metrics", methods=["GET"])
 def metrics():
