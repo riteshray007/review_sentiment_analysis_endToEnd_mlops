@@ -100,3 +100,47 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+  # ─────────────────────────────────────────────────────────────
+  # JOB 3: DEPLOY & ROLLOUT RESTART ON AWS EKS
+  # Runs only after the Docker image is successfully pushed to ECR
+  # ─────────────────────────────────────────────────────────────
+  deploy_to_eks:
+    needs: [build_and_push_ecr]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update Kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name mlops-sentiment-cluster
+
+      - name: Ensure Namespace Exists & Update Secrets
+        run: |
+          kubectl create namespace flask-app --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret generic app-secrets \
+            --namespace flask-app \
+            --from-literal=DAGSHUB_USERNAME="${{ secrets.DAGSHUB_USERNAME }}" \
+            --from-literal=DAGSHUB_TOKEN="${{ secrets.DAGSHUB_TOKEN }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply Kubernetes Deployment Manifest
+        run: |
+          kubectl apply -f k8s/flask-deployment.yaml
+
+      - name: Trigger Zero-Downtime Rolling Restart
+        run: |
+          kubectl rollout restart deployment flask-app -n flask-app
+
+      - name: Verify Rollout Status
+        run: |
+          kubectl rollout status deployment/flask-app -n flask-app --timeout=180s
