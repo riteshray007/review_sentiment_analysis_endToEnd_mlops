@@ -16,9 +16,10 @@ concurrency:
 
 jobs:
   # ─────────────────────────────────────────────────────────────
-  # JOB 1: DATA PIPELINE, MODEL TESTING & PROMOTION
+  # JOB 1: RUN DVC PIPELINE, ALL TESTS & MODEL PROMOTION
+  # Installs Python packages only ONCE for all tests
   # ─────────────────────────────────────────────────────────────
-  model_pipeline:
+  test_and_promote:
     runs-on: ubuntu-latest
 
     steps:
@@ -61,29 +62,6 @@ jobs:
         run: |
           python scripts/promote_model.py
 
-  # ─────────────────────────────────────────────────────────────
-  # JOB 2: FLASK APP UNIT & INTEGRATION TESTS
-  # Runs only after Job 1 succeeds (testing the newly promoted model)
-  # ─────────────────────────────────────────────────────────────
-  flask_testing:
-    needs: [model_pipeline]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: 'pip'
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          pip install -r requirements.txt
-
       - name: Run Flask App Tests (Production)
         env:
           MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
@@ -92,11 +70,11 @@ jobs:
           python -m unittest tests/test_flask_app.py
 
   # ─────────────────────────────────────────────────────────────
-  # JOB 3: BUILD AND PUSH DOCKER IMAGE TO AWS ECR
-  # Runs only after both model and Flask tests pass
+  # JOB 2: BUILD AND PUSH DOCKER IMAGE TO AWS ECR
+  # Independent job - can be rerun alone if network/ECR fails
   # ─────────────────────────────────────────────────────────────
   build_and_push_ecr:
-    needs: [flask_testing]
+    needs: [test_and_promote]
     runs-on: ubuntu-latest
 
     steps:

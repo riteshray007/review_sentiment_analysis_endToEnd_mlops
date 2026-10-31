@@ -1,0 +1,22 @@
+server:
+  persistentVolume:
+    enabled: false
+
+alertmanager:
+  enabled: false
+
+pushgateway:
+  enabled: false
+
+nodeExporter:
+  enabled: false
+
+kubeStateMetrics:
+  enabled: false
+
+extraScrapeConfigs: |
+  - job_name: 'flask-sentiment-app'
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['flask-app-service.flask-app.svc.cluster.local:5000']
