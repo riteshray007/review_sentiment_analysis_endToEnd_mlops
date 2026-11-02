@@ -17,8 +17,7 @@ models/
 src/configs/model_info.json
 src/configs/model_metrics.yaml
 src/configs/validation_report.json
-important_lesson.txt
-video_record_content.txt
+tempFiles/
 
 # Distribution / packaging
 .Python
