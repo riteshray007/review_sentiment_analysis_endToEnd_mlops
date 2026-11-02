@@ -18,5 +18,12 @@ extraScrapeConfigs: |
   - job_name: 'flask-sentiment-app'
     metrics_path: '/metrics'
     scrape_interval: 5s
-    static_configs:
-      - targets: ['flask-app-service.flask-app.svc.cluster.local:5000']
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names:
+            - flask-app
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_name]
+        action: keep
+        regex: flask-app-service
