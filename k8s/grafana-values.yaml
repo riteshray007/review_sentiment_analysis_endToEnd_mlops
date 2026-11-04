@@ -16,3 +16,10 @@ datasources:
         url: http://prometheus-server.prometheus.svc.cluster.local
         isDefault: true
         editable: true
+
+# Enable sidecar to watch for dashboard ConfigMaps
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    searchNamespace: ALL
